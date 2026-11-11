@@ -122,6 +122,58 @@ Building requires `dpkg-deb` (normally installed on Ubuntu). Package creation
 does not install anything or change desktop preferences. Choose either the user
 installation or the Debian package to avoid duplicate menu launchers.
 
+## GitHub repository and release workflow
+
+The project uses `main` and separate Conventional Commits for the application,
+update checker, and release automation. Generated artifacts, Python caches,
+`.env` files, and logs are ignored. GitHub Releases are the updater's source of
+truth; pushing source or a tag alone does not count as a published update.
+
+One-time setup for a new repository (GitHub CLI must be signed in):
+
+```sh
+gh auth login --hostname github.com --git-protocol https --web --scopes workflow
+gh repo create OWNER/desktop-studio --public --source=. --remote=origin
+/usr/bin/python3 scripts/configure_github.py OWNER/desktop-studio
+git add data/update-source.json
+git commit -m "chore: configure GitHub release source"
+git push -u origin main
+```
+
+Use your actual GitHub account/organization in place of `OWNER`. Configuration
+does not create a token or embed credentials. Once the source is configured,
+`make release-package` builds these artifacts from the single version in
+`desktop_studio/__init__.py`:
+
+- `desktop-studio_VERSION_all.deb` for Debian package installations.
+- `desktop-studio-VERSION-linux.tar.gz` containing the per-user installer and
+  selected source files. Extract it and run `/usr/bin/python3 scripts/install.py`.
+- `SHA256SUMS`, which can be checked with `sha256sum --check SHA256SUMS`.
+
+The package builders copy Git-tracked files from checkouts, excluding ignored or
+untracked local credentials and artifacts. Release builds bind both packages to
+the publishing repository without modifying source configuration or desktop
+settings. This also makes the workflow work correctly in forks.
+
+To publish the initial release:
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+For later releases, bump `__version__` to the next stable semantic version, commit
+the change, push `main`, then create and push the matching `vVERSION` tag.
+`.github/workflows/ci.yml` tests and packages pushes/pull requests.
+`.github/workflows/release.yml` tests the tagged source, requires a clean checkout
+and an exact version/tag match, builds packages and checksums, uploads them to a
+draft GitHub Release, then publishes it as the latest stable release. Published
+assets are never silently replaced. A failed draft upload can be retried safely.
+The workflow can also be dispatched manually for an existing matching tag.
+
+After a new release is published, older app versions can see it through
+**Software Updates**. Public release checks work without GitHub authentication.
+
 ## What is implemented
 
 - Global search through installed schema keys, descriptions, curated labels,

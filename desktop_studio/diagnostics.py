@@ -1,4 +1,5 @@
 import shutil
+from . import __version__
 from .core.settings import Ref
 
 
@@ -9,7 +10,7 @@ def report(registry, env):
         if registry.exists(ref):
             dock[key] = registry.value(ref).unpack()
     return {
-        "application": "Desktop Studio 1.0.0", "os": env.os,
+        "application": "Desktop Studio " + __version__, "os": env.os,
         "shell": env.shell_version, "session": env.session,
         "schemas": len(registry.schemas),
         "extension_schemas": {k: sorted(v) for k, v in registry.extension_schema_ids.items()},

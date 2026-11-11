@@ -1,4 +1,4 @@
-.PHONY: run test verify install uninstall package translations
+.PHONY: run test verify install uninstall package release-package translations
 PYTHON = /usr/bin/python3
 run:
 	$(PYTHON) -m desktop_studio
@@ -15,3 +15,5 @@ package: translations
 	$(PYTHON) scripts/build_deb.py
 translations:
 	$(PYTHON) scripts/build_translations.py
+release-package: translations
+	$(PYTHON) scripts/build_release.py

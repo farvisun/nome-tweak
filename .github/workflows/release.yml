@@ -1,0 +1,55 @@
+name: Publish stable release
+
+on:
+  push:
+    tags: ['v[0-9]*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable tag matching desktop_studio/__init__.py
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gdkpixbuf-2.0 libglib2.0-bin gsettings-desktop-schemas librsvg2-common desktop-file-utils
+      - name: Test the tagged source
+        run: |
+          make translations
+          make test
+          desktop-file-validate data/io.github.desktopstudio.DesktopStudio.desktop
+      - name: Build version-matched packages and checksums
+        run: /usr/bin/python3 scripts/build_release.py --tag "$RELEASE_TAG" --repository "$GITHUB_REPOSITORY"
+      - name: Publish completed release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          existing=$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' 2>/dev/null || true)
+          if [ "$existing" = "false" ]; then
+            echo "This version is already published. Create a new version instead of replacing published assets."
+            exit 1
+          fi
+          if [ "$existing" != "true" ]; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Desktop Studio $RELEASE_TAG" --generate-notes
+          fi
+          gh release upload "$RELEASE_TAG" dist/*.deb dist/*-linux.tar.gz dist/SHA256SUMS --clobber
+          gh release edit "$RELEASE_TAG" --draft=false --latest
