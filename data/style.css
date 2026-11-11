@@ -1,0 +1,16 @@
+.studio-sidebar { background-color: var(--sidebar-bg-color); color: var(--sidebar-fg-color); }
+.navigation-sidebar row { border-radius: 10px; margin-bottom: 3px; }
+.navigation-sidebar row:selected { background: color-mix(in srgb, var(--accent-bg-color) 16%, transparent); color: var(--accent-color); }
+.info-box { padding: 16px; border-radius: 12px; background-color: color-mix(in srgb, var(--accent-bg-color) 8%, var(--card-bg-color)); }
+.badge { padding: 3px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background-color: color-mix(in srgb, var(--accent-bg-color) 12%, transparent); color: var(--accent-color); }
+.hero { padding: 28px; border-radius: 20px; background: linear-gradient(120deg, color-mix(in srgb, var(--accent-bg-color) 14%, var(--card-bg-color)), var(--card-bg-color)); }
+.metric { padding: 18px; border-radius: 14px; background-color: var(--card-bg-color); box-shadow: 0 1px 3px alpha(black, 0.05); }
+.preview { border-radius: 16px; background: linear-gradient(135deg, #193c46, #376b69 55%, #9aae8d); }
+.preview-bar { background: alpha(black, 0.58); color: white; padding: 7px 14px; }
+.preview-dock { background: alpha(black, 0.38); border: 1px solid alpha(white, 0.2); padding: 9px 13px; border-radius: 17px; margin: 16px; }
+.preview-window { padding: 22px; border-radius: 12px; background: alpha(white, 0.94); color: #223335; box-shadow: 0 6px 28px alpha(black, 0.22); }
+.shortcut-key { padding: 6px 10px; border-radius: 7px; background: var(--card-bg-color); border: 1px solid var(--border-color); font-family: monospace; }
+.section-link { padding: 16px; border-radius: 12px; }
+.caption { line-height: 1.35; }
+textview { background-color: var(--view-bg-color); color: var(--view-fg-color); }
+.cursor-card { padding: 18px; border-radius: 14px; background: var(--card-bg-color); border: 1px solid var(--border-color); }

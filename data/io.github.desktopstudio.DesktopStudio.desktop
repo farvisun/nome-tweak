@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Desktop Studio
+Name[fa]=استودیو دسکتاپ
+Comment=Personalize your GNOME desktop with confidence
+Comment[fa]=تنظیم و شخصی‌سازی میزکار گنوم
+Exec=desktop-studio
+Icon=io.github.desktopstudio.DesktopStudio
+Terminal=false
+Categories=Settings;DesktopSettings;GTK;
+Keywords=GNOME;Ubuntu;Dock;Keyboard;Themes;Preferences;
+StartupNotify=true
+DBusActivatable=false

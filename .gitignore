@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+artifacts/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+*.deb

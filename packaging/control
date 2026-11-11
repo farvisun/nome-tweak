@@ -1,0 +1,11 @@
+Package: desktop-studio
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Desktop Studio contributors <desktop-studio@localhost>
+Depends: python3 (>= 3.10), python3-gi, gir1.2-gtk-4.0 (>= 4.12), gir1.2-adw-1 (>= 1.5), gir1.2-gdkpixbuf-2.0, librsvg2-common
+Recommends: gnome-control-center, wireplumber
+Description: Native GNOME desktop configuration studio
+ Configure appearance, dock, shortcuts, windows, workspaces, and more.
+ Includes a dynamic GSettings browser, reviewed profiles, backups, and undo.

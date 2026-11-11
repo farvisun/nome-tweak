@@ -1,0 +1,271 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Desktop Studio 1.0\n"
+"Language: fa\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Desktop Studio"
+msgstr "استودیو دسکتاپ"
+
+msgid "Overview"
+msgstr "نمای کلی"
+
+msgid "Appearance"
+msgstr "ظاهر"
+
+msgid "Dock"
+msgstr "داک"
+
+msgid "Top Bar & Extensions"
+msgstr "نوار بالا و افزونه‌ها"
+
+msgid "Keyboard"
+msgstr "صفحه‌کلید"
+
+msgid "Windows & Workspaces"
+msgstr "پنجره‌ها و فضاهای کاری"
+
+msgid "Mouse & Touchpad"
+msgstr "ماوس و صفحهٔ لمسی"
+
+msgid "Displays"
+msgstr "نمایشگرها"
+
+msgid "Sound & Notifications"
+msgstr "صدا و اعلان‌ها"
+
+msgid "Power & Privacy"
+msgstr "انرژی و حریم خصوصی"
+
+msgid "Accessibility"
+msgstr "دسترس‌پذیری"
+
+msgid "System & Apps"
+msgstr "سیستم و برنامه‌ها"
+
+msgid "Advanced Settings"
+msgstr "تنظیمات پیشرفته"
+
+msgid "Profiles & Backups"
+msgstr "نمایه‌ها و پشتیبان‌ها"
+
+msgid "Recent Changes"
+msgstr "تغییرات اخیر"
+
+msgid "A desktop that feels like yours."
+msgstr "میزکاری به سلیقهٔ شما."
+
+msgid "Color, character, and the finer details."
+msgstr "رنگ، سبک و جزئیات ظریف."
+
+msgid "Your applications, exactly where you want them."
+msgstr "برنامه‌های شما، درست همان‌جایی که می‌خواهید."
+
+msgid "Layouts, shortcuts, and familiar muscle memory."
+msgstr "چیدمان‌ها، میانبرها و عادت‌های آشنا."
+
+msgid "Make room for the way you work."
+msgstr "فضایی برای شیوهٔ کار شما."
+
+msgid "Explore the settings your system exposes."
+msgstr "تنظیمات در دسترس سیستم خود را بررسی کنید."
+
+msgid "Connected to your desktop"
+msgstr "متصل به میزکار شما"
+
+msgid "Your desktop, thoughtfully configured"
+msgstr "میزکار شما، با تنظیماتی سنجیده"
+
+msgid "Search settings, descriptions, and keywords…"
+msgstr "جستجوی تنظیمات، توضیحات و کلیدواژه‌ها…"
+
+msgid "Global settings search"
+msgstr "جستجوی همهٔ تنظیمات"
+
+msgid "Search"
+msgstr "جستجو"
+
+msgid "Personal style"
+msgstr "سبک شخصی"
+
+msgid "Accent color"
+msgstr "رنگ تأکیدی"
+
+msgid "Icon theme"
+msgstr "تم آیکون"
+
+msgid "GTK theme"
+msgstr "تم GTK"
+
+msgid "Interface animations"
+msgstr "پویانمایی‌های رابط"
+
+msgid "Background"
+msgstr "پس‌زمینه"
+
+msgid "Light background"
+msgstr "پس‌زمینهٔ روشن"
+
+msgid "Dark background"
+msgstr "پس‌زمینهٔ تیره"
+
+msgid "Cursor"
+msgstr "نشانگر"
+
+msgid "Cursor theme"
+msgstr "تم نشانگر"
+
+msgid "Cursor size"
+msgstr "اندازهٔ نشانگر"
+
+msgid "Typography"
+msgstr "نوشتار"
+
+msgid "Interface font"
+msgstr "قلم رابط"
+
+msgid "Document font"
+msgstr "قلم سند"
+
+msgid "Monospace font"
+msgstr "قلم تک‌عرض"
+
+msgid "Text scale"
+msgstr "مقیاس متن"
+
+msgid "Keyboard layouts"
+msgstr "چیدمان‌های صفحه‌کلید"
+
+msgid "Always visible"
+msgstr "همیشه نمایان"
+
+msgid "Automatic hiding"
+msgstr "پنهان‌شدن خودکار"
+
+msgid "Hide when windows overlap"
+msgstr "پنهان‌شدن هنگام هم‌پوشانی پنجره‌ها"
+
+msgid "Apply"
+msgstr "اعمال"
+
+msgid "Close"
+msgstr "بستن"
+
+msgid "Save"
+msgstr "ذخیره"
+
+msgid "Add"
+msgstr "افزودن"
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Edit…"
+msgstr "ویرایش…"
+
+msgid "Choose…"
+msgstr "انتخاب…"
+
+msgid "Reset to default"
+msgstr "بازگردانی پیش‌فرض"
+
+msgid "Copy value"
+msgstr "رونوشت مقدار"
+
+msgid "Current: "
+msgstr "مقدار کنونی: "
+
+msgid "Default"
+msgstr "پیش‌فرض"
+
+msgid "Writable"
+msgstr "قابل تغییر"
+
+msgid "Locked by policy"
+msgstr "قفل‌شده با خط‌مشی"
+
+msgid "Application Appearance"
+msgstr "ظاهر برنامه"
+
+msgid "Follow System"
+msgstr "پیروی از سیستم"
+
+msgid "Light"
+msgstr "روشن"
+
+msgid "Dark"
+msgstr "تیره"
+
+msgid "Diagnostics"
+msgstr "عیب‌یابی"
+
+msgid "About Desktop Studio"
+msgstr "دربارهٔ استودیو دسکتاپ"
+
+msgid "Quit"
+msgstr "خروج"
+
+msgid "Personalize your desktop"
+msgstr "میزکار خود را شخصی‌سازی کنید"
+
+msgid "Initial snapshot saved"
+msgstr "پشتیبان اولیه ذخیره شد"
+
+msgid "Save current configuration"
+msgstr "ذخیرهٔ تنظیمات کنونی"
+
+msgid "Import a profile"
+msgstr "واردکردن نمایه"
+
+msgid "Compare"
+msgstr "مقایسه"
+
+msgid "Name"
+msgstr "نام"
+
+msgid "Include categories"
+msgstr "دسته‌های انتخابی"
+
+msgid "Administrator"
+msgstr "مدیر سیستم"
+
+msgid "Logout"
+msgstr "خروج از نشست"
+
+msgid "Extension"
+msgstr "افزونه"
+
+msgid "Ryoku cursors…"
+msgstr "نشانگرهای ریوکو…"
+
+msgid "Ryoku cursor collection"
+msgstr "مجموعهٔ نشانگرهای ریوکو"
+
+msgid "Bibata · the Ryoku cursor family"
+msgstr "بیباتا · خانوادهٔ نشانگرهای ریوکو"
+
+msgid "Install collection"
+msgstr "نصب مجموعه"
+
+msgid "Use this cursor"
+msgstr "استفاده از این نشانگر"
+
+msgid "Selected"
+msgstr "انتخاب‌شده"
+
+msgid "Install collection to use"
+msgstr "ابتدا مجموعه را نصب کنید"
+
+msgid "Ryoku default"
+msgstr "پیش‌فرض ریوکو"
+
+msgid "Current cursor: {current} · {installed}/{total} collection themes installed"
+msgstr "نشانگر کنونی: {current} · {installed} از {total} تم مجموعه نصب شده است"
+
+msgid "Downloading cursors…"
+msgstr "در حال دریافت نشانگرها…"
+
+msgid "Installing cursor images…"
+msgstr "در حال نصب تصاویر نشانگر…"
