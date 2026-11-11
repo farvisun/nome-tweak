@@ -7,7 +7,7 @@ import sys
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from . import APP_ID, __version__
 from .catalog import CATEGORIES, CATEGORY_MAP, SPECS, Spec, category_for, profile_refs
@@ -16,7 +16,8 @@ from .core.settings import Registry, SettingsStore, Ref
 from .i18n import _, is_rtl
 from .platform.displays import Displays
 from .platform.keyboard import Toshy
-from .platform.services import Environment, Extensions, open_settings, open_uri
+from .platform.services import Environment, Extensions, background, open_settings, open_uri
+from .platform.updates import UpdateChecker, UpdateResult
 from .ui.widgets import SettingRow, action_row, button, group, info_box, label, dialog
 
 log = logging.getLogger(__name__)
@@ -106,6 +107,7 @@ class StudioWindow(Adw.ApplicationWindow):
             appearance.append(name, f"app.appearance::{val}")
         menu.append_submenu(_("Application Appearance"), appearance)
         menu.append(_("Ryoku cursor collection"), "app.cursors")
+        menu.append(_("Software Updates"), "app.updates")
         menu.append(_("Diagnostics"), "app.diagnostics")
         menu.append(_("About Desktop Studio"), "app.about")
         menu.append(_("Quit"), "app.quit")
@@ -256,6 +258,8 @@ class StudioWindow(Adw.ApplicationWindow):
 
 
 class DesktopStudio(Adw.Application):
+    __gsignals__ = {"updates-checked": (GObject.SignalFlags.RUN_FIRST, None, ())}
+
     def __init__(self):
         super().__init__(application_id=APP_ID, flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
         self.state_dir = Path(GLib.get_user_state_dir()) / "desktop-studio"
@@ -269,6 +273,11 @@ class DesktopStudio(Adw.Application):
         (self.state_dir / "desktop-studio.log").chmod(0o600)
         self.env = Environment()
         self.extensions = Extensions()
+        self.update_checker = UpdateChecker()
+        self.update_busy = False
+        self.update_result = None
+        self.update_timer = None
+        self.notified_update = None
         try:
             active_extensions = {uuid for uuid, data in self.extensions.list().items() if data.get("state") == 1}
         except Exception:
@@ -296,7 +305,7 @@ class DesktopStudio(Adw.Application):
         provider = Gtk.CssProvider()
         provider.load_from_path(str(ROOT / "data/style.css"))
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        for name, callback in (("quit", lambda *_a: self.quit()), ("search", lambda *_a: self.window.focus_search()), ("about", self.about), ("diagnostics", self.diagnostics), ("cursors", self.cursor_collection)):
+        for name, callback in (("quit", lambda *_a: self.quit()), ("search", lambda *_a: self.window.focus_search()), ("about", self.about), ("diagnostics", self.diagnostics), ("cursors", self.cursor_collection), ("updates", self.software_updates)):
             action = Gio.SimpleAction.new(name, None)
             action.connect("activate", callback)
             self.add_action(action)
@@ -317,6 +326,46 @@ class DesktopStudio(Adw.Application):
             if self.initial_error:
                 GLib.idle_add(lambda: (self.window.error(_("Initial snapshot could not be saved: ") + self.initial_error), False)[1])
         self.window.present()
+        if self.get_application_id() == APP_ID and self.update_timer is None:
+            def first_check():
+                self.check_software_updates(manual=False)
+                self.update_timer = GLib.timeout_add_seconds(3600, self.automatic_update_check)
+                return False
+            self.update_timer = GLib.timeout_add_seconds(5, first_check)
+
+    def automatic_update_check(self):
+        self.check_software_updates(manual=False)
+        # The timer lives only in this regular application process.
+        return True
+
+    def check_software_updates(self, manual=False):
+        if self.update_busy:
+            return
+        if not manual and not self.update_checker.should_check():
+            return
+        repository = self.update_checker.preferences.repository
+        self.update_busy = True
+        self.emit("updates-checked")
+        def complete(result):
+            self.update_busy = False
+            if repository == self.update_checker.preferences.repository:
+                self.update_result = result
+                if result.available and self.notified_update != result.release.version:
+                    self.notified_update = result.release.version
+                    toast = Adw.Toast(title=_("Desktop Studio {version} is available").format(version=result.release.version), button_label=_("View update"), timeout=8)
+                    toast.connect("button-clicked", self.software_updates)
+                    self.window.toasts.add_toast(toast)
+            self.emit("updates-checked")
+            log.info("Software update check completed: %s", result.status)
+        def failed(_message):
+            import time
+            complete(UpdateResult(repository, __version__, time.time(), "check-failed", message=_("The update check could not complete. Check the network and whether the application’s state folder is writable, then try again.")))
+        background(lambda: self.update_checker.check(repository), complete, failed)
+
+    def software_updates(self, *_args):
+        if self.window:
+            from .ui.updates import updates_dialog
+            updates_dialog(self.window)
 
     def about(self, *_args):
         d = Adw.AboutDialog(application_name=_("Desktop Studio"), application_icon=APP_ID, developer_name="Desktop Studio contributors", version=__version__, comments=_("A thoughtful home for your GNOME desktop preferences."), license_type=Gtk.License.MIT_X11)

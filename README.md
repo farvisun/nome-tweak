@@ -77,6 +77,37 @@ stretch/rotate/trail effects and its optional wallpaper-driven Material recolori
 are separate integrations and are not enabled by this collection. Application
 uninstall preserves the cursor themes you installed, just as it preserves profiles.
 
+## Software updates
+
+Open **Main menu → Software Updates** for **Check now**, release notes, downloads,
+and the optional automatic check. When enabled, checks run at most once per day
+while the application is open. They inspect stable published **GitHub Releases**;
+drafts, prereleases, and bare Git tags are excluded. No background service is
+installed. Updates are never downloaded or installed automatically.
+
+The official release source is stored in `data/update-source.json`. The dialog
+also accepts a GitHub `owner/repository` or repository URL, so builds from forks
+can check their own releases. Per-user overrides and the daily-check preference
+are stored in `~/.config/desktop-studio/updates.json`; check results and times are
+stored in `~/.local/state/desktop-studio/updates.json`. These files never contain
+GitHub tokens or exported desktop settings. Public releases need no sign-in.
+For a private repository, the checker can reuse `gh auth login` through GitHub
+CLI’s supported API command, without extracting or copying credentials.
+
+For a terminal check without opening GTK:
+
+```sh
+./desktop-studio --check-updates
+# Check a specific repository without saving an override:
+./desktop-studio --check-updates --repository OWNER/REPOSITORY
+```
+
+The checker compares semantic versions, handles network/rate-limit/authentication
+errors visibly, and never suggests a downgrade. Download links must match the
+configured GitHub repository, release tag, and exact versioned package name.
+After installing an update, restart Desktop Studio. Your desktop preferences,
+profiles, backups, cursor themes, and remapping configuration stay in place.
+
 ## Local Debian package
 
 ```sh

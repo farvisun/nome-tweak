@@ -269,3 +269,60 @@ msgstr "در حال دریافت نشانگرها…"
 
 msgid "Installing cursor images…"
 msgstr "در حال نصب تصاویر نشانگر…"
+
+msgid "Software Updates"
+msgstr "به‌روزرسانی برنامه"
+
+msgid "Keep Desktop Studio up to date"
+msgstr "استودیو دسکتاپ را به‌روز نگه دارید"
+
+msgid "Installed version"
+msgstr "نسخهٔ نصب‌شده"
+
+msgid "Release source"
+msgstr "منبع انتشار"
+
+msgid "GitHub repository"
+msgstr "مخزن گیت‌هاب"
+
+msgid "Save source"
+msgstr "ذخیرهٔ منبع"
+
+msgid "Check automatically"
+msgstr "بررسی خودکار"
+
+msgid "Check now"
+msgstr "هم‌اکنون بررسی کنید"
+
+msgid "Checking GitHub…"
+msgstr "در حال بررسی گیت‌هاب…"
+
+msgid "Update status"
+msgstr "وضعیت به‌روزرسانی"
+
+msgid "You’re up to date"
+msgstr "نسخهٔ شما به‌روز است"
+
+msgid "Update check needs attention"
+msgstr "بررسی به‌روزرسانی نیاز به توجه دارد"
+
+msgid "View release"
+msgstr "مشاهدهٔ انتشار"
+
+msgid "View update"
+msgstr "مشاهدهٔ به‌روزرسانی"
+
+msgid "Release notes"
+msgstr "یادداشت‌های انتشار"
+
+msgid "Download user installer"
+msgstr "دریافت نصب‌کنندهٔ کاربری"
+
+msgid "Download .deb"
+msgstr "دریافت بستهٔ دبیان"
+
+msgid "Release source saved"
+msgstr "منبع انتشار ذخیره شد"
+
+msgid "Desktop Studio {version} is available"
+msgstr "نسخهٔ {version} استودیو دسکتاپ در دسترس است"
