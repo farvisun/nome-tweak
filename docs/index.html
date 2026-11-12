@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nome-tweak · Desktop Studio for GNOME</title>
+<meta name="description" content="nome-tweak (Desktop Studio) is a native GTK4 and libadwaita app for configuring GNOME on Ubuntu, with reviewed profiles, checked undo, and no background services.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="nome-tweak · Desktop Studio for GNOME">
+<meta property="og:description" content="Every GNOME setting in one careful place: native GTK4, reviewed profiles, checked undo, and nothing applied behind your back.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/overview-light.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #f7f8f7;
+  --surface: #ffffff;
+  --surface-2: #eef2f1;
+  --text: #17201f;
+  --muted: #56625f;
+  --faint: #8a9592;
+  --border: #dde3e1;
+  --accent: #1f7a72;
+  --accent-strong: #145c56;
+  --accent-soft: #e2f0ee;
+  --code-bg: #0f1716;
+  --code-fg: #d7e7e4;
+  --shadow: 0 1px 2px rgb(16 24 23 / 0.05), 0 12px 40px -12px rgb(16 24 23 / 0.18);
+  --radius: 14px;
+  --font: ui-sans-serif, "Inter", "Cantarell", "Ubuntu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "JetBrains Mono", "Ubuntu Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1413; --surface: #161d1c; --surface-2: #1c2523; --text: #e8eeec; --muted: #a2b0ac; --faint: #75837f;
+    --border: #2a3533; --accent: #5cc4b8; --accent-strong: #84d6cc; --accent-soft: #173431; --code-bg: #0a0f0e;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 48px -16px rgb(0 0 0 / 0.6);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1413; --surface: #161d1c; --surface-2: #1c2523; --text: #e8eeec; --muted: #a2b0ac; --faint: #75837f;
+  --border: #2a3533; --accent: #5cc4b8; --accent-strong: #84d6cc; --accent-soft: #173431; --code-bg: #0a0f0e;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 48px -16px rgb(0 0 0 / 0.6);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 16px; top: 12px; z-index: 10; background: var(--surface); padding: 8px 12px; }
+
+/* Header */
+header.site { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--border); }
+header.site .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; letter-spacing: -0.01em; }
+.brand:hover { text-decoration: none; }
+.brand img { width: 28px; height: 28px; }
+nav.primary { display: flex; gap: 22px; margin-left: auto; align-items: center; }
+nav.primary a { color: var(--muted); font-size: 0.93rem; font-weight: 500; }
+nav.primary a:hover { color: var(--text); text-decoration: none; }
+@media (max-width: 760px) { nav.primary a.optional { display: none; } }
+.icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+.icon-btn:hover { background: var(--surface-2); }
+.icon-btn svg { width: 18px; height: 18px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; border: 1px solid transparent; cursor: pointer; }
+.btn:hover { text-decoration: none; }
+.btn svg { width: 18px; height: 18px; }
+.btn-primary { background: var(--accent); color: #fff; }
+:root[data-theme="dark"] .btn-primary { color: #06201d; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-primary { color: #06201d; } }
+.btn-primary:hover { background: var(--accent-strong); }
+.btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-ghost:hover { background: var(--surface-2); }
+
+/* Hero */
+.hero { padding: 80px 0 40px; text-align: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.hero h1 { font-size: clamp(2.3rem, 5.4vw, 4rem); line-height: 1.05; letter-spacing: -0.035em; margin: 22px auto 18px; max-width: 18ch; }
+.hero h1 span { color: var(--accent); }
+.hero p.lead { font-size: clamp(1.05rem, 1.6vw, 1.22rem); color: var(--muted); max-width: 640px; margin: 0 auto 30px; }
+.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.meta { display: flex; gap: 10px 22px; justify-content: center; flex-wrap: wrap; margin-top: 26px; color: var(--faint); font-size: 0.88rem; }
+.meta span { display: inline-flex; align-items: center; gap: 7px; }
+.meta span::before { content: ""; width: 6px; height: 6px; border-radius: 99px; background: var(--accent); opacity: 0.7; }
+
+/* Showcase */
+.showcase { padding-top: 24px; padding-bottom: 72px; }
+.frame { border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.frame img { width: 100%; height: auto; aspect-ratio: 1280 / 860; }
+.shot-dark { display: none; }
+:root[data-theme="dark"] .shot-light { display: none; }
+:root[data-theme="dark"] .shot-dark { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .shot-light { display: none; } :root:not([data-theme="light"]) .shot-dark { display: block; } }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+.stats div { padding: 22px 24px; border-left: 1px solid var(--border); }
+.stats div:first-child { border-left: 0; }
+.stats strong { display: block; font-size: 1.7rem; letter-spacing: -0.02em; line-height: 1.2; }
+.stats span { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats div:nth-child(3) { border-left: 0; } .stats div:nth-child(n+3) { border-top: 1px solid var(--border); } }
+
+/* Sections */
+section.block { padding: 88px 0; }
+section.alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section-head { max-width: 680px; margin-bottom: 44px; }
+.section-head .kicker { color: var(--accent); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.section-head h2 { font-size: clamp(1.75rem, 3.4vw, 2.5rem); letter-spacing: -0.025em; line-height: 1.15; margin: 10px 0 14px; }
+.section-head p { color: var(--muted); margin: 0; font-size: 1.05rem; }
+
+/* Features */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 960px) { .grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+.card { padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+section.alt .card { background: var(--bg); }
+.card .ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); margin-bottom: 16px; }
+.card .ico svg { width: 20px; height: 20px; }
+.card h3 { margin: 0 0 6px; font-size: 1.05rem; letter-spacing: -0.01em; }
+.card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+/* Gallery */
+.tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 22px; flex-wrap: wrap; }
+.tabs button { font: inherit; font-size: 0.92rem; font-weight: 600; color: var(--muted); background: transparent; border: 0; padding: 8px 16px; border-radius: 9px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
+.gallery-caption { color: var(--muted); margin: 16px 2px 0; font-size: 0.95rem; }
+[role="tabpanel"][hidden] { display: none; }
+
+/* Safety */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; gap: 32px; } }
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+.checks li { display: grid; grid-template-columns: 28px 1fr; gap: 14px; }
+.checks li svg { width: 22px; height: 22px; color: var(--accent); margin-top: 2px; }
+.checks strong { display: block; margin-bottom: 2px; }
+.checks span { color: var(--muted); font-size: 0.95rem; }
+
+/* Install */
+.install { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .install { grid-template-columns: 1fr; } }
+.code { position: relative; border-radius: 12px; background: var(--code-bg); color: var(--code-fg); border: 1px solid var(--border); }
+.code pre { margin: 0; padding: 20px 22px; overflow-x: auto; font: 0.88rem/1.7 var(--mono); }
+.code .c { color: #7f9a95; }
+.copy { position: absolute; top: 10px; right: 10px; font: 600 0.78rem var(--font); color: var(--code-fg); background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.14); border-radius: 7px; padding: 5px 10px; cursor: pointer; }
+.copy:hover { background: rgb(255 255 255 / 0.16); }
+.req { padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.req h3 { margin: 0 0 12px; font-size: 1rem; }
+.req dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 0.93rem; }
+.req dt { color: var(--muted); }
+.req dd { margin: 0; font-weight: 500; }
+.req p { color: var(--muted); font-size: 0.88rem; margin: 16px 0 0; }
+
+/* CTA band */
+.band { text-align: center; padding: 72px 24px; border-radius: 20px; background: linear-gradient(135deg, var(--accent-soft), var(--surface)); border: 1px solid var(--border); }
+.band h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.02em; margin: 0 0 12px; }
+.band p { color: var(--muted); margin: 0 0 26px; }
+
+footer.site { border-top: 1px solid var(--border); padding: 32px 0 44px; color: var(--faint); font-size: 0.88rem; }
+footer.site .wrap { display: flex; gap: 16px 28px; flex-wrap: wrap; align-items: center; }
+footer.site nav { display: flex; gap: 20px; margin-left: auto; flex-wrap: wrap; }
+footer.site a { color: var(--muted); }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="nome-tweak home"><img src="assets/icon.svg" alt="" width="28" height="28">nome-tweak</a>
+    <nav class="primary" aria-label="Primary">
+      <a class="optional" href="#features">Features</a>
+      <a class="optional" href="#tour">Tour</a>
+      <a class="optional" href="#safety">Safety</a>
+      <a href="#install">Install</a>
+      <button class="icon-btn" id="theme" type="button" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+      <a class="icon-btn" href="https://github.com/farvisun/nome-tweak" aria-label="Source code on GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.82 1.19 3.08 0 4.41-2.7 5.38-5.27 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap" id="top">
+    <div class="hero">
+      <span class="eyebrow">Desktop Studio for GNOME</span>
+      <h1>Every GNOME setting. <span>One careful place.</span></h1>
+      <p class="lead">nome-tweak is a native GTK4 and libadwaita app for Ubuntu and GNOME. It finds what your system actually supports, shows you exactly what will change, and keeps a way back for every edit.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#install">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+          Install
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/farvisun/nome-tweak">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+          View source
+        </a>
+      </div>
+      <div class="meta"><span>GTK4 + libadwaita</span><span>Wayland ready</span><span>No root process</span><span>MIT licensed</span></div>
+    </div>
+  </div>
+
+  <div class="wrap showcase">
+    <div class="frame">
+      <img class="shot-light" src="assets/overview-light.png" width="1280" height="860" alt="Desktop Studio overview: summary cards, a desktop preview, and settings categories grouped by Personalization, Input &amp; Devices, System, and Management.">
+      <img class="shot-dark" src="assets/overview-dark.png" width="1280" height="860" alt="Desktop Studio overview in dark mode." loading="lazy">
+    </div>
+    <div class="stats" style="margin-top:24px">
+      <div><strong>15</strong><span>settings categories</span></div>
+      <div><strong>Every</strong><span>installed schema searchable</span></div>
+      <div><strong>0</strong><span>background services</span></div>
+      <div><strong>100%</strong><span>local; no account, no telemetry</span></div>
+    </div>
+  </div>
+
+  <section class="block alt" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Features</div>
+        <h2>The depth of a power tool, with the manners of a system app.</h2>
+        <p>Curated controls for everyday preferences, plus a typed editor for every key your system exposes.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+          <h3>Global search</h3>
+          <p>Search every installed GSettings key, description, and curated label from the header, using Ctrl+F or Ctrl+K.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 9.8C22 5.5 17.5 2 12 2Z"/></svg></div>
+          <h3>Appearance &amp; dock</h3>
+          <p>Accent color, themes, fonts, cursors, and backgrounds with a live preview. Ubuntu Dock position, size, and pinned apps.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></div>
+          <h3>Keyboard &amp; shortcuts</h3>
+          <p>XKB layouts and modifiers, a shortcut recorder with conflict detection, custom commands, and Toshy Mac-style mappings.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <h3>Displays</h3>
+          <p>Live Mutter state, arrangement preview, scale, refresh rate, and Night Light. GNOME Shell's Keep / Revert timeout protects every change.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></div>
+          <h3>Profiles &amp; backups</h3>
+          <p>Save, export, and import setups by category. Compare every difference before applying, with an automatic backup first.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></div>
+          <h3>History with checked undo</h3>
+          <p>Every change is recorded by day. Undo refuses to run if another app has changed the value since.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg></div>
+          <h3>Windows &amp; input</h3>
+          <p>Title-bar buttons, focus, tiling, and workspaces. Mouse and touchpad speed, scrolling, and tapping, based on detected hardware.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>Advanced browser</h3>
+          <p>Browse system, application, and extension schemas with type, range, default, and policy lock state, plus a typed editor.</p>
+        </article>
+        <article class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg></div>
+          <h3>Extensions &amp; system</h3>
+          <p>Extension runtime state and preferences, default apps, startup entries, networking, and Bluetooth, through supported GNOME services.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="tour">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Tour</div>
+        <h2>Designed like the rest of your desktop.</h2>
+        <p>libadwaita all the way down. It follows your light or dark preference, accent color, and right-to-left languages, and adapts to narrow windows.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Screenshots">
+        <button role="tab" id="t-appearance" aria-controls="p-appearance" aria-selected="true">Appearance</button>
+        <button role="tab" id="t-keyboard" aria-controls="p-keyboard" aria-selected="false" tabindex="-1">Keyboard</button>
+        <button role="tab" id="t-profiles" aria-controls="p-profiles" aria-selected="false" tabindex="-1">Profiles</button>
+        <button role="tab" id="t-history" aria-controls="p-history" aria-selected="false" tabindex="-1">History</button>
+        <button role="tab" id="t-search" aria-controls="p-search" aria-selected="false" tabindex="-1">Search</button>
+      </div>
+      <div role="tabpanel" id="p-appearance" aria-labelledby="t-appearance">
+        <div class="frame"><img src="assets/appearance-dark.png" width="1280" height="860" loading="lazy" alt="Appearance page in dark mode with a desktop preview, color scheme, accent color, icon and GTK theme controls."></div>
+        <p class="gallery-caption">Curated controls show their effect immediately. Reset appears only for values you've changed.</p>
+      </div>
+      <div role="tabpanel" id="p-keyboard" aria-labelledby="t-keyboard" hidden>
+        <div class="frame"><img src="assets/keyboard-light.png" width="1280" height="860" loading="lazy" alt="Keyboard page with layout switching, Caps Lock, Compose, and key repeat controls."></div>
+        <p class="gallery-caption">XKB options are edited one family at a time, so your other options stay as they are.</p>
+      </div>
+      <div role="tabpanel" id="p-profiles" aria-labelledby="t-profiles" hidden>
+        <div class="frame"><img src="assets/profiles-light.png" width="1280" height="860" loading="lazy" alt="Profiles page with create and import actions, starting presets, and saved profiles including a protected restore point."></div>
+        <p class="gallery-caption">Your initial configuration is captured once and kept as a permanent restore point.</p>
+      </div>
+      <div role="tabpanel" id="p-history" aria-labelledby="t-history" hidden>
+        <div class="frame"><img src="assets/history-light.png" width="1280" height="860" loading="lazy" alt="Recent Changes page grouped by day, with status labels and undo buttons."></div>
+        <p class="gallery-caption">A day-by-day record of what changed, each entry with its own undo.</p>
+      </div>
+      <div role="tabpanel" id="p-search" aria-labelledby="t-search" hidden>
+        <div class="frame"><img src="assets/search-light.png" width="1280" height="860" loading="lazy" alt="Search results for cursor across Appearance, Keyboard, and System categories."></div>
+        <p class="gallery-caption">Search ranks curated settings above raw schema keys, grouped by category.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt" id="safety">
+    <div class="wrap split">
+      <div class="section-head" style="margin-bottom:0">
+        <div class="kicker">Safety by design</div>
+        <h2>Built to never surprise you.</h2>
+        <p>Opening the app only reads your configuration. Settings change only when you use a control or explicitly apply a change you've reviewed.</p>
+      </div>
+      <ul class="checks">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><strong>Refuses stale writes</strong><span>Editors remember the value they opened with and won't overwrite a change made by another app.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><strong>Backup before every grouped change</strong><span>Profiles, presets, and undo snapshot the affected settings first. Every change is journaled.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><strong>Secrets stay out of exports</strong><span>Password, token, credential, and command values are excluded from profiles and history.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><strong>Runs as you, never as root</strong><span>No sudo and no daemon. System operations go through GNOME's own authorization.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><strong>Updates on your terms</strong><span>Optional checks at most once a day against stable GitHub Releases. Nothing downloads or installs automatically.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="install">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Install</div>
+        <h2>Up and running in a minute.</h2>
+        <p>Uses the system Python and GTK, with no virtual environment, pip packages, or administrator access for a per-user install.</p>
+      </div>
+      <div class="install">
+        <div>
+          <div class="tabs" role="tablist" aria-label="Installation method">
+            <button role="tab" id="t-user" aria-controls="p-user" aria-selected="true">Per-user</button>
+            <button role="tab" id="t-deb" aria-controls="p-deb" aria-selected="false" tabindex="-1">Debian package</button>
+            <button role="tab" id="t-run" aria-controls="p-run" aria-selected="false" tabindex="-1">Run from source</button>
+          </div>
+          <div role="tabpanel" id="p-user" aria-labelledby="t-user">
+            <div class="code"><button class="copy" type="button">Copy</button><pre><code><span class="c"># Dependencies (Ubuntu)</span>
+sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
+  gir1.2-gdkpixbuf-2.0 librsvg2-common
+
+git clone https://github.com/farvisun/nome-tweak.git
+cd nome-tweak
+/usr/bin/python3 scripts/install.py
+~/.local/bin/desktop-studio</code></pre></div>
+          </div>
+          <div role="tabpanel" id="p-deb" aria-labelledby="t-deb" hidden>
+            <div class="code"><button class="copy" type="button">Copy</button><pre><code><span class="c"># Download the .deb from the latest GitHub release, then:</span>
+sudo apt install ./desktop-studio_*_all.deb
+desktop-studio
+
+<span class="c"># Or build it locally from a checkout</span>
+make package
+sudo apt install ./dist/desktop-studio_*_all.deb</code></pre></div>
+          </div>
+          <div role="tabpanel" id="p-run" aria-labelledby="t-run" hidden>
+            <div class="code"><button class="copy" type="button">Copy</button><pre><code>git clone https://github.com/farvisun/nome-tweak.git
+cd nome-tweak
+./desktop-studio
+
+<span class="c"># Tests and live, read-only verification</span>
+make test
+make verify</code></pre></div>
+          </div>
+        </div>
+        <aside class="req" aria-labelledby="req-title">
+          <h3 id="req-title">Requirements</h3>
+          <dl>
+            <dt>Desktop</dt><dd>GNOME Shell (tested on Wayland)</dd>
+            <dt>Toolkit</dt><dd>GTK 4.12+ · libadwaita 1.5+</dd>
+            <dt>Runtime</dt><dd>System Python 3 with PyGObject</dd>
+            <dt>Tested on</dt><dd>Ubuntu 26.04 · GNOME 50</dd>
+            <dt>Optional</dt><dd>Ubuntu Dock, Toshy, WirePlumber</dd>
+          </dl>
+          <p>Optional integrations are detected at runtime. Anything your system doesn't provide is labeled clearly, never faked.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap" style="padding-bottom:88px">
+    <div class="band">
+      <h2>Make GNOME feel like yours, without the guesswork.</h2>
+      <p>Free and open source under the MIT license.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/farvisun/nome-tweak/releases">Get the latest release</a>
+        <a class="btn btn-ghost" href="https://github.com/farvisun/nome-tweak/issues">Report an issue</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>© 2026 Desktop Studio contributors · MIT License</span>
+    <nav aria-label="Footer">
+      <a href="https://github.com/farvisun/nome-tweak">Source</a>
+      <a href="https://github.com/farvisun/nome-tweak/releases">Releases</a>
+      <a href="https://github.com/farvisun/nome-tweak/issues">Issues</a>
+      <a href="https://github.com/farvisun/nome-tweak/blob/main/LICENSE">License</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function stored() { try { return localStorage.getItem("theme"); } catch (e) { return null; } }
+  var saved = stored();
+  if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+  document.getElementById("theme").addEventListener("click", function () {
+    var current = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = current === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+
+  document.querySelectorAll('[role="tablist"]').forEach(function (list) {
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute("aria-selected", on);
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener("click", function () { select(tab); });
+      tab.addEventListener("keydown", function (e) {
+        var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (d) { e.preventDefault(); select(tabs[(i + d + tabs.length) % tabs.length], true); }
+      });
+    });
+  });
+
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.parentElement.querySelector("code").innerText;
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = "Copied";
+        setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+      }, function () { btn.textContent = "Select & copy"; });
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,5 +1,9 @@
 # Desktop Studio
 
+**Website:** https://farvisun.github.io/nome-tweak/ · **Releases:** https://github.com/farvisun/nome-tweak/releases
+
+![Desktop Studio overview](docs/assets/overview-light.png)
+
 A native Python 3, GTK4, and libadwaita application for Ubuntu and GNOME.
 It discovers the installed session and schemas instead of assuming that a setting
 or extension exists. Opening the app never applies a preset or resets preferences.
