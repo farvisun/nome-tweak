@@ -10,11 +10,16 @@ import subprocess
 import threading
 
 from gi.repository import Gio, GLib
-try:
-    from gi.repository import GioUnix
-    DesktopAppInfo = GioUnix.DesktopAppInfo
-except ImportError:
-    DesktopAppInfo = Gio.DesktopAppInfo
+# GLib 2.86 deprecated Gio.DesktopAppInfo in favor of GioUnix. Older GLib
+# (e.g. 2.80 on Ubuntu 24.04) ships a GioUnix typelib whose DesktopAppInfo
+# methods are unusable from Python, so only switch on new enough GLib.
+DesktopAppInfo = Gio.DesktopAppInfo
+if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+    try:
+        from gi.repository import GioUnix
+        DesktopAppInfo = GioUnix.DesktopAppInfo
+    except ImportError:
+        pass
 
 from ..core.settings import SettingsError
 
