@@ -81,6 +81,21 @@ class CoreTests(unittest.TestCase):
         ref = self.ref(key)
         return self.store.set(ref, value, self.registry.state(ref), key)
 
+    def test_profile_delete_is_confined_to_saved_profiles(self):
+        saved = self.profiles.save(self.profiles.snapshot("Mine", [self.ref("enabled")]))
+        initial = self.profiles.initial([self.ref("enabled")])
+        outside = self.root / "outside.json"
+        outside.write_text("{}")
+        with self.assertRaises(SettingsError):
+            self.profiles.delete(initial)
+        with self.assertRaises(SettingsError):
+            self.profiles.delete(outside)
+        with self.assertRaises(SettingsError):
+            self.profiles.delete(self.profiles.directory / ".." / "outside.json")
+        self.profiles.delete(saved)
+        self.assertFalse(saved.exists())
+        self.assertTrue(initial.exists() and outside.exists())
+
     def test_open_and_snapshot_do_not_write(self):
         before = {r: self.registry.state(r) for r in self.registry.refs()}
         path = self.profiles.initial(list(self.registry.refs()))

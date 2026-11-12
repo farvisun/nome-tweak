@@ -108,6 +108,15 @@ class Profiles:
                 pass
         return sorted(result, key=lambda x: x[1].get("created", ""), reverse=True)
 
+    def delete(self, path):
+        """Remove a saved profile; only files inside the profile folder qualify."""
+        path = Path(path).resolve()
+        if path.parent != self.directory.resolve() or path.suffix != ".json":
+            raise SettingsError("Only saved profiles can be deleted")
+        if path.name == "initial-snapshot.json":
+            raise SettingsError("The initial snapshot is kept as a permanent restore point")
+        path.unlink()
+
     @staticmethod
     def validate_document(profile):
         if not isinstance(profile, dict) or profile.get("format") != FORMAT or type(profile.get("version")) is not int or profile["version"] != VERSION:
