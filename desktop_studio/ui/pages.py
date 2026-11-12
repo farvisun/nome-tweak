@@ -48,7 +48,9 @@ def desktop_preview(w):
     frame.append(center)
     dock = Gtk.Box(spacing=14, halign=Gtk.Align.CENTER)
     dock.add_css_class("preview-dock")
-    for icon in ("org.gnome.Nautilus", "firefox", "org.gnome.Terminal", "org.gnome.Settings", APP_ID):
+    theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
+    for candidates in (("org.gnome.Nautilus", "system-file-manager"), ("firefox", "web-browser"), ("org.gnome.Ptyxis", "org.gnome.Terminal", "utilities-terminal"), ("org.gnome.Settings", "preferences-system"), (APP_ID,)):
+        icon = next((name for name in candidates if theme.has_icon(name)), candidates[-1])
         dock.append(Gtk.Image(icon_name=icon, pixel_size=30))
     frame.append(dock)
     preview.add_overlay(frame)
