@@ -326,3 +326,102 @@ msgstr "منبع انتشار ذخیره شد"
 
 msgid "Desktop Studio {version} is available"
 msgstr "نسخهٔ {version} استودیو دسکتاپ در دسترس است"
+
+msgid "Personalization"
+msgstr "شخصی‌سازی"
+
+msgid "Input & Devices"
+msgstr "ورودی و دستگاه‌ها"
+
+msgid "System"
+msgstr "سیستم"
+
+msgid "Management"
+msgstr "مدیریت"
+
+msgid "Categories"
+msgstr "دسته‌ها"
+
+msgid "Search settings, descriptions, and keys"
+msgstr "جستجوی تنظیمات، توضیحات و کلیدها"
+
+msgid "Search results"
+msgstr "نتایج جستجو"
+
+msgid "Version {version}"
+msgstr "نسخهٔ {version}"
+
+msgid "Update available · {version}"
+msgstr "به‌روزرسانی موجود است · {version}"
+
+msgid "Session"
+msgstr "نشست"
+
+msgid "Customized settings"
+msgstr "تنظیمات سفارشی‌شده"
+
+msgid "Saved profiles"
+msgstr "نمایه‌های ذخیره‌شده"
+
+msgid "Last change"
+msgstr "آخرین تغییر"
+
+msgid "None yet"
+msgstr "هنوز هیچ"
+
+msgid "Today"
+msgstr "امروز"
+
+msgid "Yesterday"
+msgstr "دیروز"
+
+msgid "Today at {time}"
+msgstr "امروز، {time}"
+
+msgid "Yesterday at {time}"
+msgstr "دیروز، {time}"
+
+msgid "Applied"
+msgstr "اعمال‌شده"
+
+msgid "Undone"
+msgstr "برگردانده‌شده"
+
+msgid "Interrupted"
+msgstr "ناتمام"
+
+msgid "Failed"
+msgstr "ناموفق"
+
+msgid "Automatic backups"
+msgstr "پشتیبان‌های خودکار"
+
+msgid "Restore point"
+msgstr "نقطهٔ بازگردانی"
+
+msgid "Compare…"
+msgstr "مقایسه…"
+
+msgid "Export…"
+msgstr "خروجی گرفتن…"
+
+msgid "Delete…"
+msgstr "حذف…"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Cancel"
+msgstr "لغو"
+
+msgid "Profile deleted"
+msgstr "نمایه حذف شد"
+
+msgid "Unavailable"
+msgstr "در دسترس نیست"
+
+msgid "More in GNOME Settings"
+msgstr "موارد بیشتر در تنظیمات گنوم"
+
+msgid "No changes yet"
+msgstr "هنوز تغییری ثبت نشده"
