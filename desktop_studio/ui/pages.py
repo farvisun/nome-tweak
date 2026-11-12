@@ -7,11 +7,11 @@ import shutil
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango
 
 from .. import APP_ID
-from ..catalog import CATEGORY_MAP, SPECS, Spec
+from ..catalog import CATEGORIES, CATEGORY_MAP, SECTIONS, SPECS, Spec
 from ..core.settings import Ref, SettingsError
 from ..i18n import _
 from ..platform.services import Audio, Connections, DesktopAppInfo, StartupApps, background, launch, open_settings, open_uri, theme_names
-from .widgets import SettingRow, action_row, button, dialog, group, info_box, label
+from .widgets import SettingRow, action_row, button, dialog, friendly_time, group, info_box, label, pill
 
 
 def value(w, schema, key, default=""):
@@ -20,7 +20,7 @@ def value(w, schema, key, default=""):
 
 
 def desktop_preview(w):
-    preview = Gtk.Overlay(height_request=250)
+    preview = Gtk.Overlay(height_request=220)
     preview.add_css_class("preview")
     preview.set_overflow(Gtk.Overflow.HIDDEN)
     background = Gtk.Picture(content_fit=Gtk.ContentFit.COVER, can_shrink=True)
@@ -56,29 +56,68 @@ def desktop_preview(w):
     return preview
 
 
+def metric(icon, title, val, tooltip=None):
+    box = Gtk.Box(spacing=14)
+    box.add_css_class("metric")
+    box.append(Gtk.Image(icon_name=icon, pixel_size=20, valign=Gtk.Align.START, margin_top=2))
+    text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, hexpand=True)
+    text.append(label(title, "metric-label", False))
+    value_label = label(str(val), "metric-value", False)
+    value_label.set_ellipsize(Pango.EllipsizeMode.END)
+    value_label.set_max_width_chars(10)
+    value_label.set_tooltip_text(str(val))
+    text.append(value_label)
+    box.append(text)
+    if tooltip:
+        box.set_tooltip_text(tooltip)
+    return box
+
+
+def category_tile(w, cat):
+    tile = Gtk.Button()
+    tile.add_css_class("flat")
+    tile.add_css_class("tile")
+    box = Gtk.Box(spacing=14)
+    icon = Gtk.Image(icon_name=cat.icon, pixel_size=18, valign=Gtk.Align.CENTER)
+    icon.add_css_class("tile-icon")
+    box.append(icon)
+    text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, valign=Gtk.Align.CENTER)
+    text.append(label(cat.title, "heading", False))
+    description = label(cat.description, "caption dim-label")
+    description.set_lines(2); description.set_ellipsize(Pango.EllipsizeMode.END)
+    text.append(description)
+    box.append(text)
+    tile.set_child(box)
+    tile.update_property([Gtk.AccessibleProperty.LABEL], [cat.title])
+    tile.connect("clicked", lambda _b: w.navigate(cat.id))
+    return tile
+
+
 def build_overview(w, content):
-    hero = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-    hero.add_css_class("hero")
-    hero.append(label(_("MAKE YOURSELF AT HOME"), "caption-heading"))
-    hero.append(label(_("A desktop that\nfeels like yours."), "title-1"))
-    hero.append(label(_("One thoughtful space for the details that make your desktop work for you."), "dim-label"))
-    hero.append(button(label=_("Personalize your desktop"), callback=lambda: w.navigate("appearance"), css="suggested-action"))
-    content.append(hero)
-    content.append(desktop_preview(w))
-    metrics = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, column_spacing=12, row_spacing=12, homogeneous=True, min_children_per_line=1, max_children_per_line=3)
-    for icon, title, val in (("video-display-symbolic", _("Your session"), f"GNOME {w.env.shell_version} · {w.env.session.capitalize()}"), ("applications-graphics-symbolic", _("Icon theme"), value(w, "org.gnome.desktop.interface", "icon-theme", _("Unknown"))), ("document-save-symbolic", _("Your starting point"), _("Initial snapshot saved") if not w.get_application().initial_error else _("Snapshot unavailable"))):
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        box.add_css_class("metric")
-        image = Gtk.Image(icon_name=icon, pixel_size=24, halign=Gtk.Align.START)
-        image.add_css_class("accent")
-        box.append(image); box.append(label(title, "caption")); box.append(label(str(val), "heading"))
-        metrics.append(box)
+    customized = sum(1 for spec in SPECS if w.registry.exists(spec.ref) and w.registry.state(spec.ref)["user"] is not None)
+    profiles = [p for _path, p in w.profiles.list() if not p["name"].startswith("Automatic backup")]
+    last = w.history.entries[-1]["time"] if w.history.entries else None
+    metrics = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, column_spacing=12, row_spacing=12, homogeneous=True, min_children_per_line=2, max_children_per_line=4)
+    metrics.update_property([Gtk.AccessibleProperty.LABEL], [_("Desktop summary")])
+    for item in (
+        metric("video-display-symbolic", _("Session") + " · " + w.env.session.capitalize(), f"GNOME {w.env.shell_version}", w.env.os),
+        metric("document-edit-symbolic", _("Customized settings"), str(customized), _("Curated settings that differ from their defaults")),
+        metric("document-save-symbolic", _("Saved profiles"), str(len(profiles)), _("Initial snapshot saved") if not w.get_application().initial_error else _("Snapshot unavailable")),
+        metric("document-open-recent-symbolic", _("Last change"), friendly_time(last) if last else _("None yet")),
+    ):
+        metrics.append(item)
+        item.get_parent().set_focusable(False)
     content.append(metrics)
-    g = group(_("Continue exploring"))
-    for cat in ("dock", "keyboard", "profiles", "advanced"):
-        c = CATEGORY_MAP[cat]
-        g.add(action_row(c.title, c.description, lambda cat=cat: w.navigate(cat), c.icon))
-    content.append(g)
+    content.append(desktop_preview(w))
+    for section, title in SECTIONS.items():
+        heading = Gtk.Box(margin_top=4)
+        heading.append(label(title, "section-title", False))
+        content.append(heading)
+        tiles = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, column_spacing=10, row_spacing=10, homogeneous=True, min_children_per_line=1, max_children_per_line=2)
+        for cat in CATEGORIES:
+            if cat.section == section:
+                tiles.append(category_tile(w, cat))
+        content.append(tiles)
     content.append(info_box(_("Opening Desktop Studio and selecting a profile only read your configuration. Settings change when you use a control or explicitly apply a reviewed group.")))
 
 
@@ -187,8 +226,6 @@ def build_pinned(w, content):
             row = action_row(app.get_display_name() if app else app_id, app_id)
             if app and app.get_icon():
                 row.add_prefix(Gtk.Image(gicon=app.get_icon(), pixel_size=24))
-            def move(delta, i=index):
-                items = current[:]; items[i], items[i + delta] = items[i + delta], items[i]; change(items)
             up = button(icon="go-up-symbolic", callback=lambda i=index: move_at(i, -1), tooltip=_("Move up"), css="flat")
             down = button(icon="go-down-symbolic", callback=lambda i=index: move_at(i, 1), tooltip=_("Move down"), css="flat")
             def move_at(i, delta):
@@ -218,7 +255,7 @@ def build_pinned(w, content):
 def build_extensions(w, content):
     w.add_specs(content, "extensions")
     g = group(_("Installed extensions"), _("GNOME Shell reports the actual runtime state. Disabling some extensions takes effect after logout."))
-    g.set_header_suffix(button(icon="view-refresh-symbolic", callback=lambda: w.render("extensions"), tooltip=_("Refresh extensions")))
+    g.set_header_suffix(button(icon="view-refresh-symbolic", callback=lambda: w.render("extensions"), tooltip=_("Refresh extensions"), css="flat"))
     content.append(g)
     try:
         extensions = w.extensions.list()
@@ -230,12 +267,14 @@ def build_extensions(w, content):
         status = w.extensions.STATES.get(state, _("Unknown"))
         versions = data.get("shell-version", [])
         error = data.get("error", "")
-        subtitle = f"{status} · {uuid}"
+        subtitle = uuid
         if versions:
             subtitle += "\n" + _("Supported Shell versions: ") + ", ".join(str(x) for x in versions)
         if error:
             subtitle += "\n" + str(error)
         row = action_row(data.get("name", uuid), subtitle)
+        kind = {1: "success", 3: "error", 4: "warning"}.get(state, "neutral")
+        row.add_suffix(pill(_(status), kind))
         toggle = Gtk.Switch(active=bool(data.get("enabled", state == 1)), valign=Gtk.Align.CENTER, sensitive=bool(data.get("canChange", True)) and (state in (1, 2, 6) or bool(data.get("enabled"))))
         toggle.update_property([Gtk.AccessibleProperty.LABEL], [_("Enable extension: ") + data.get("name", uuid)])
         def toggled(s, _p, uuid=uuid, state=state):
@@ -245,7 +284,7 @@ def build_extensions(w, content):
         toggle.connect("notify::active", toggled)
         row.add_suffix(toggle)
         if data.get("hasPrefs") or data.get("has-prefs"):
-            row.add_suffix(button(icon="emblem-system-symbolic", callback=lambda uuid=uuid: w.safe(lambda: w.extensions.preferences(uuid)), tooltip=_("Extension preferences")))
+            row.add_suffix(button(icon="emblem-system-symbolic", callback=lambda uuid=uuid: w.safe(lambda: w.extensions.preferences(uuid)), tooltip=_("Extension preferences"), css="flat circular row-action"))
         schemas = w.registry.extension_schema_ids.get(uuid, set())
         if not schemas:
             # Some system extensions use globally installed schemas.
@@ -254,13 +293,13 @@ def build_extensions(w, content):
             elif "tiling-assistant" in uuid:
                 schemas = {"org.gnome.shell.extensions.tiling-assistant"}
         if schemas:
-            row.add_suffix(button(icon="preferences-other-symbolic", callback=lambda schemas=schemas: extension_schemas(w, schemas), tooltip=_("Browse exposed extension settings")))
+            row.add_suffix(button(icon="preferences-other-symbolic", callback=lambda schemas=schemas: extension_schemas(w, schemas), tooltip=_("Browse exposed extension settings"), css="flat circular row-action"))
         if state in (3, 4) or error:
-            row.add_suffix(button(icon="dialog-warning-symbolic", callback=lambda uuid=uuid: extension_errors(w, uuid), tooltip=_("Show extension errors")))
+            row.add_suffix(button(icon="dialog-warning-symbolic", callback=lambda uuid=uuid: extension_errors(w, uuid), tooltip=_("Show extension errors"), css="flat circular row-action"))
         g.add(row)
     content.append(info_box(_("Extension settings are read from installed GSettings schemas and the extension preferences API. Desktop Studio never edits extension source files or bypasses version compatibility checks.")))
     g2 = group(_("More extensions"))
-    g2.add(action_row(_("GNOME Extensions website"), _("Find extensions compatible with your Shell version."), lambda: w.safe(lambda: open_uri("https://extensions.gnome.org/")), "web-browser-symbolic"))
+    g2.add(action_row(_("GNOME Extensions website"), _("Find extensions compatible with your Shell version."), lambda: w.safe(lambda: open_uri("https://extensions.gnome.org/")), "web-browser-symbolic", external=True))
     content.append(g2)
     scheduled = {"pending": False}
     def changed(_p, _sender, signal, _args):
@@ -410,7 +449,7 @@ def build_connections(w, content):
                 background(lambda: connections.set_network(field, enabled, expected), lambda _r: w.render("system") if w.current_page == "system" else None, lambda msg: (w.error(msg), w.render("system") if w.current_page == "system" else None))
             toggle.connect("notify::active", changed)
     except Exception as exc:
-        g.add(action_row(_("NetworkManager"), str(exc)))
+        g.add(unavailable_row(_("Networking"), _("NetworkManager is not available in this session."), exc))
     try:
         adapters = connections.bluetooth()
         for path, props in adapters:
@@ -425,10 +464,10 @@ def build_connections(w, content):
         if not adapters:
             g.add(action_row(_("Bluetooth"), _("No Bluetooth adapter reported by BlueZ.")))
     except Exception as exc:
-        g.add(action_row(_("Bluetooth"), str(exc)))
-    g.add(action_row(_("Network settings"), _("Connections, VPN, and network details."), lambda: w.safe(lambda: open_settings("network"))))
-    g.add(action_row(_("Wi-Fi settings"), _("Choose and manage wireless networks."), lambda: w.safe(lambda: open_settings("wifi"))))
-    g.add(action_row(_("Bluetooth settings"), _("Pair and manage Bluetooth devices."), lambda: w.safe(lambda: open_settings("bluetooth"))))
+        g.add(unavailable_row(_("Bluetooth"), _("The Bluetooth service (BlueZ) is not running."), exc))
+    g.add(action_row(_("Network settings"), _("Connections, VPN, and network details."), lambda: w.safe(lambda: open_settings("network")), external=True))
+    g.add(action_row(_("Wi-Fi settings"), _("Choose and manage wireless networks."), lambda: w.safe(lambda: open_settings("wifi")), external=True))
+    g.add(action_row(_("Bluetooth settings"), _("Pair and manage Bluetooth devices."), lambda: w.safe(lambda: open_settings("bluetooth")), external=True))
     scheduled = {"pending": False}
     def refresh(*_args):
         if scheduled["pending"]:
@@ -450,6 +489,13 @@ def build_connections(w, content):
                 w.subscribe(proxy, "g-properties-changed", refresh)
         except Exception:
             pass
+
+
+def unavailable_row(title, message, exc):
+    row = action_row(title, message)
+    row.set_tooltip_text(str(exc))
+    row.add_suffix(pill(_("Unavailable"), "neutral", str(exc)))
+    return row
 
 
 def build_defaults(w, content):

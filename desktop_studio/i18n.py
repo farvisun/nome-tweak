@@ -16,6 +16,10 @@ def _(message):
     return _translation.gettext(message) if message else ""
 
 
+def n_(singular, plural, count):
+    return _translation.ngettext(singular, plural, count)
+
+
 def is_rtl():
     language = (os.environ.get("LANGUAGE") or os.environ.get("LC_ALL") or os.environ.get("LC_MESSAGES") or os.environ.get("LANG") or "en").split(":")[0].split("_")[0].split(".")[0]
     return language in {"fa", "ar", "he", "ur", "ps", "dv", "yi"}

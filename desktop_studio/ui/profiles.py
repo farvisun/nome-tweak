@@ -6,9 +6,9 @@ from gi.repository import Adw, Gio, GLib, Gtk
 from ..catalog import CATEGORIES, CATEGORY_MAP, SPECS, category_for, profile_refs
 from ..core.settings import Ref, SettingsError
 from ..core.profiles import atomic_json
-from ..i18n import _
+from ..i18n import _, n_
 from ..platform.services import open_uri
-from .widgets import action_row, button, dialog, group, info_box, label
+from .widgets import action_row, button, clock_time, day_heading, dialog, friendly_time, group, info_box, label, pill
 
 PROFILE_CATEGORIES = [c for c in CATEGORIES if c.id not in ("overview", "advanced", "profiles", "history")]
 
@@ -40,18 +40,54 @@ def build(w, content):
         review_dialog(w, w.profiles.defaults(refs), selected={"appearance", "windows"})
     optional.add(action_row(_("GNOME schema defaults"), _("Defaults from your installed schemas, which may include Ubuntu adjustments. Choose categories before applying."), defaults))
     content.append(optional)
-    saved = group(_("Saved profiles & automatic backups"))
-    saved.set_header_suffix(button(icon="folder-open-symbolic", callback=lambda: w.safe(lambda: open_uri(w.profiles.directory.as_uri())), tooltip=_("Open profile folder")))
+    saved = group(_("Saved profiles"), _("Compare a profile with your current desktop before applying any of it."))
+    saved.set_header_suffix(button(icon="folder-open-symbolic", callback=lambda: w.safe(lambda: open_uri(w.profiles.directory.as_uri())), tooltip=_("Open profile folder"), css="flat"))
     content.append(saved)
     profiles = w.profiles.list()
-    for path, profile in profiles:
-        row = action_row(profile["name"], f"{len(profile['settings'])} " + _("settings") + " · " + profile.get("created", ""))
-        review = button(label=_("Compare"), callback=lambda p=profile: review_dialog(w, p))
-        row.add_suffix(review); row.set_activatable_widget(review)
-        row.add_suffix(button(icon="document-send-symbolic", callback=lambda p=profile: export_profile(w, p), tooltip=_("Export selected categories")))
-        saved.add(row)
-    if not profiles:
+    backups = [(path, p) for path, p in profiles if p["name"].startswith("Automatic backup")]
+    named = [(path, p) for path, p in profiles if not p["name"].startswith("Automatic backup")]
+    for path, profile in named:
+        saved.add(profile_row(w, path, profile))
+    if not named:
         saved.add(action_row(_("No saved profiles"), _("Use Save current configuration to create one.")))
+    if backups:
+        history = group(_("Automatic backups"), _("Created before every grouped change, profile application, and undo."))
+        expander = Adw.ExpanderRow(title=n_("{count} backup", "{count} backups", len(backups)).format(count=len(backups)), subtitle=_("Latest: ") + friendly_time(backups[0][1].get("created", "")))
+        for path, profile in backups[:30]:
+            expander.add_row(profile_row(w, path, profile, backup=True))
+        history.add(expander)
+        content.append(history)
+
+
+def profile_row(w, path, profile, backup=False):
+    initial = path.name == "initial-snapshot.json"
+    title = friendly_time(profile.get("created", "")) if backup else profile["name"]
+    count = len(profile["settings"])
+    subtitle = n_("{count} setting", "{count} settings", count).format(count=count)
+    if not backup:
+        subtitle += " · " + friendly_time(profile.get("created", ""))
+    row = action_row(title, subtitle, icon=None if backup else ("security-high-symbolic" if initial else "document-save-symbolic"))
+    if initial:
+        row.add_suffix(pill(_("Restore point"), "accent", _("Captured the first time Desktop Studio opened")))
+    review = button(label=_("Compare…"), callback=lambda: review_dialog(w, profile), css="flat")
+    row.add_suffix(review); row.set_activatable_widget(review)
+    row.add_suffix(button(icon="document-send-symbolic", callback=lambda: export_profile(w, profile), tooltip=_("Export…"), css="flat circular row-action"))
+    if not initial:
+        row.add_suffix(button(icon="user-trash-symbolic", callback=lambda: delete_profile(w, path, title), tooltip=_("Delete…"), css="flat circular row-action"))
+    return row
+
+
+def delete_profile(w, path, title):
+    d = Adw.AlertDialog(heading=_("Delete “{name}”?").format(name=title), body=_("The profile file is removed. Your current desktop settings are not changed."))
+    d.add_response("cancel", _("Cancel"))
+    d.add_response("delete", _("Delete"))
+    d.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
+    d.set_default_response("cancel"); d.set_close_response("cancel")
+    def response(_d, answer):
+        if answer == "delete":
+            w.safe(lambda: w.profiles.delete(path), lambda _r: (w.toast(_("Profile deleted")), w.render("profiles")))
+    d.connect("response", response)
+    d.present(w)
 
 
 def save_current(w):
@@ -173,29 +209,40 @@ def review_dialog(w, profile, selected=None, imported=False):
     return d
 
 
+STATUS = {"applied": ("Applied", "success"), "undone": ("Undone", "neutral"), "pending": ("Interrupted", "warning"), "failed": ("Failed", "error")}
+
+
 def build_history(w, content):
     content.append(info_box(_("Recent GSettings changes made in Desktop Studio are recorded here. Undo checks that every value still matches that change. Sensitive values and operations on external services are not recorded for replay.")))
-    g = group(_("Recent changes"))
-    content.append(g)
-    entries = list(reversed(w.history.entries))[-200:]
-    for entry in entries[:100]:
-        row = action_row(entry["label"], f"{entry['time']} · {entry['status']} · {len(entry['changes'])} " + _("settings"))
+    entries = list(reversed(w.history.entries))[:100]
+    current, g = None, None
+    for entry in entries:
+        heading = day_heading(entry["time"])
+        if heading != current:
+            current, g = heading, group(heading)
+            content.append(g)
+        count = len(entry["changes"])
+        subtitle = clock_time(entry["time"]) + " · " + n_("{count} setting", "{count} settings", count).format(count=count)
         if entry.get("excluded"):
-            row.set_subtitle(row.get_subtitle() + "\n" + _("Contains private values; full undo is unavailable."))
+            subtitle += "\n" + _("Contains private values; full undo is unavailable.")
         if entry["status"] == "pending":
-            row.set_subtitle(row.get_subtitle() + "\n" + _("An interrupted operation was recorded. Inspect current values and restore its automatic backup if needed."))
-        row.add_suffix(button(icon="dialog-information-symbolic", callback=lambda e=entry: history_details(w, e), tooltip=_("Inspect change")))
+            subtitle += "\n" + _("An interrupted operation was recorded. Inspect current values and restore its automatic backup if needed.")
+        row = action_row(entry["label"], subtitle, lambda e=entry: history_details(w, e))
+        text, kind = STATUS.get(entry["status"], (entry["status"].capitalize(), "neutral"))
+        row.add_prefix(pill(_(text), kind))
         if entry["status"] == "applied" and entry["changes"] and not entry.get("excluded"):
-            row.add_suffix(button(label=_("Undo…"), callback=lambda e=entry: history_details(w, e, undo=True)))
+            row.add_suffix(button(icon="edit-undo-symbolic", callback=lambda e=entry: history_details(w, e, undo=True), tooltip=_("Undo…"), css="flat circular row-action"))
         g.add(row)
     if not entries:
-        g.add(action_row(_("A clean starting point"), _("No settings have been changed through Desktop Studio.")))
+        empty = Adw.StatusPage(title=_("No changes yet"), description=_("Settings you change in Desktop Studio appear here, with a way to undo them."), icon_name="document-open-recent-symbolic")
+        empty.add_css_class("compact")
+        content.append(empty)
 
 
 def history_details(w, entry, undo=False):
     d, content, header = dialog(w, _("Undo change") if undo else _("Change details"), 850, 650)
     content.append(label(entry["label"], "title-2"))
-    g = group(entry["time"])
+    g = group(friendly_time(entry["time"]))
     content.append(g)
     for change in entry["changes"]:
         ref = Ref.from_dict(change)

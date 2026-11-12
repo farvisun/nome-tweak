@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
 from pathlib import Path
 import math
+import re
 
 import gi
 gi.require_version("Gtk", "4.0")
@@ -18,8 +20,8 @@ def button(label=None, icon=None, callback=None, tooltip=None, css=None):
     if tooltip:
         widget.set_tooltip_text(tooltip)
         widget.update_property([Gtk.AccessibleProperty.LABEL], [tooltip])
-    if css:
-        widget.add_css_class(css)
+    for name in (css.split() if css else ()):
+        widget.add_css_class(name)
     if callback:
         widget.connect("clicked", lambda _b: callback())
     return widget
@@ -27,8 +29,19 @@ def button(label=None, icon=None, callback=None, tooltip=None, css=None):
 
 def label(text, css=None, wrap=True, xalign=0):
     w = Gtk.Label(label=text, xalign=xalign, wrap=wrap, selectable=False)
-    if css:
-        w.add_css_class(css)
+    if wrap:
+        w.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+    for name in (css.split() if css else ()):
+        w.add_css_class(name)
+    return w
+
+
+def pill(text, kind="accent", tooltip=None):
+    """A compact status label; kind is accent, success, warning, error or neutral."""
+    w = label(text, f"pill pill-{kind}", False)
+    w.set_valign(Gtk.Align.CENTER)
+    if tooltip:
+        w.set_tooltip_text(tooltip)
     return w
 
 
@@ -37,14 +50,27 @@ def group(title, description=None):
 
 
 class PlainActionRow(Adw.ActionRow):
-    """Adw.ActionRow subtitles always accept markup, unlike their titles."""
+    """An action row whose title and subtitle are always plain text.
+
+    Older libadwaita parses subtitles as markup regardless of use-markup, newer
+    releases honor use-markup for both. Enabling markup and escaping both
+    strings renders literally on every supported version.
+    """
     def __init__(self, title="", subtitle="", **kwargs):
-        super().__init__(title=title, use_markup=False, **kwargs)
+        super().__init__(use_markup=True, **kwargs)
+        self.set_title(title)
         self.set_subtitle(subtitle)
 
+    def set_title(self, text):
+        self._plain_title = text or ""
+        Adw.ActionRow.set_title(self, GLib.markup_escape_text(self._plain_title))
+
+    def get_title(self):
+        return getattr(self, "_plain_title", "")
+
     def set_subtitle(self, text):
-        self._plain_subtitle = text
-        Adw.ActionRow.set_subtitle(self, GLib.markup_escape_text(text))
+        self._plain_subtitle = text or ""
+        Adw.ActionRow.set_subtitle(self, GLib.markup_escape_text(self._plain_subtitle))
 
     def get_subtitle(self):
         return getattr(self, "_plain_subtitle", "")
@@ -55,24 +81,73 @@ class PlainActionRow(Adw.ActionRow):
         Adw.ActionRow.add_suffix(self, widget)
 
 
-def action_row(title, subtitle="", callback=None, icon=None):
+def action_row(title, subtitle="", callback=None, icon=None, external=False):
+    """A row; with a callback the whole row is activatable and shows a chevron."""
     row = PlainActionRow(title=title, subtitle=subtitle)
     row.set_subtitle_lines(3)
     if icon:
-        row.add_prefix(Gtk.Image(icon_name=icon))
+        image = Gtk.Image(icon_name=icon)
+        image.add_css_class("row-icon")
+        row.add_prefix(image)
     if callback:
-        b = button(icon="go-next-symbolic", callback=callback, tooltip=title)
-        row.add_suffix(b)
-        row.set_activatable_widget(b)
+        row.set_activatable(True)
+        row.connect("activated", lambda _r: callback())
+        hint = Gtk.Image(icon_name="adw-external-link-symbolic" if external else "go-next-symbolic")
+        hint.add_css_class("dim-label")
+        hint.set_tooltip_text(_("Opens in GNOME Settings") if external else None)
+        Adw.ActionRow.add_suffix(row, hint)
     return row
 
 
-def info_box(text, icon="dialog-information-symbolic"):
+def info_box(text, icon=None, kind="info"):
+    """An inline notice. kind is info or warning."""
     box = Gtk.Box(spacing=12)
     box.add_css_class("info-box")
-    box.append(Gtk.Image(icon_name=icon, valign=Gtk.Align.START, margin_top=2))
-    box.append(label(text, "caption"))
+    box.add_css_class(f"info-{kind}")
+    image = Gtk.Image(icon_name=icon or ("dialog-warning-symbolic" if kind == "warning" else "dialog-information-symbolic"), valign=Gtk.Align.START, margin_top=1)
+    image.add_css_class("info-icon")
+    box.append(image)
+    text_label = label(text, "info-text")
+    text_label.set_hexpand(True)
+    box.append(text_label)
     return box
+
+
+def friendly_time(iso):
+    """Render an ISO timestamp as local, human-friendly text."""
+    try:
+        moment = datetime.fromisoformat(iso).astimezone()
+    except (TypeError, ValueError):
+        return iso or ""
+    today = datetime.now().astimezone().date()
+    clock = moment.strftime("%H:%M")
+    if moment.date() == today:
+        return _("Today at {time}").format(time=clock)
+    if moment.date() == today - timedelta(days=1):
+        return _("Yesterday at {time}").format(time=clock)
+    if moment.year == today.year:
+        return moment.strftime("%b %-d") + " · " + clock
+    return moment.strftime("%b %-d, %Y") + " · " + clock
+
+
+def clock_time(iso):
+    try:
+        return datetime.fromisoformat(iso).astimezone().strftime("%H:%M")
+    except (TypeError, ValueError):
+        return iso or ""
+
+
+def day_heading(iso):
+    try:
+        day = datetime.fromisoformat(iso).astimezone().date()
+    except (TypeError, ValueError):
+        return _("Earlier")
+    today = datetime.now().astimezone().date()
+    if day == today:
+        return _("Today")
+    if day == today - timedelta(days=1):
+        return _("Yesterday")
+    return day.strftime("%A, %B %-d") if day.year == today.year else day.strftime("%B %-d, %Y")
 
 
 def dialog(parent, title, width=650, height=520):
@@ -101,6 +176,32 @@ def buffer_text(view):
     return buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
 
 
+# Schema descriptions often list raw enum values that the dropdown already shows.
+ENUM_LISTING = re.compile(r"\s*(Valid|Possible|Allowed) values (are|include)\b.*$", re.I | re.S)
+
+
+def tidy_description(text):
+    text = ENUM_LISTING.sub("", text.strip()).strip()
+    return re.sub(r"\s+", " ", text)
+
+
+def display_value(value):
+    """A readable value for subtitles: strings unquoted, empty values named."""
+    typ = value.get_type_string()
+    if typ == "s":
+        text = value.unpack()
+        if not text:
+            return _("Not set (system default)")
+        if text.startswith("file://"):
+            text = Gio.File.new_for_uri(text).get_path() or text
+    elif typ == "as":
+        items = value.unpack()
+        text = ", ".join(items) if items else _("None")
+    else:
+        text = value.print_(False)
+    return text if len(text) <= 180 else text[:177] + "…"
+
+
 class SettingRow(PlainActionRow):
     def __init__(self, window, spec, advanced=False):
         super().__init__(title=spec.title)
@@ -121,15 +222,16 @@ class SettingRow(PlainActionRow):
         self.store.watch(self.ref)
         self.expected = self.registry.state(self.ref)
         if spec.badge:
-            tag = label(spec.badge, "badge", False)
-            tag.set_valign(Gtk.Align.CENTER)
-            self.add_prefix(tag)
+            self.add_suffix(pill(spec.badge, "neutral", _("Takes effect after: ") + spec.badge))
         self.make_control()
-        reset = button(icon="edit-undo-symbolic", callback=self.reset, tooltip=_("Reset to default"), css="flat")
+        # The reset button keeps its space when hidden so controls stay aligned.
+        reset = button(icon="edit-undo-symbolic", callback=self.reset, tooltip=_("Reset to default"), css="flat circular row-action")
         self.reset_button = reset
         self.add_suffix(reset)
-        more = button(icon="dialog-information-symbolic", callback=self.details, tooltip=_("Details, copy value, and typed editor"), css="flat")
-        self.add_suffix(more)
+        if not advanced:
+            # Advanced rows already open the same editor from their Edit button.
+            more = button(icon="view-more-symbolic", callback=self.details, tooltip=_("Details, copy value, and typed editor"), css="flat circular row-action dim-label")
+            self.add_suffix(more)
         self.update()
 
     def do_root(self):
@@ -220,9 +322,9 @@ class SettingRow(PlainActionRow):
         description = self.spec.description or self.key.get_description() or ""
         if not description and self.key.get_summary() != self.spec.title:
             description = self.key.get_summary() or ""
-        current = value.print_(False)
-        if len(current) > 180:
-            current = current[:177] + "…"
+        if not self.advanced:
+            description = tidy_description(description)
+        current = display_value(value)
         suffix = _("Locked by administrator policy") if not writable else ""
         if self.advanced:
             parts = [self.ref.schema + " · " + value.get_type_string(), _("Current: ") + current, suffix or description]
@@ -230,7 +332,15 @@ class SettingRow(PlainActionRow):
             parts = [p for p in (description, (_("Current: ") + current) if not isinstance(self.control, (Gtk.Switch, Gtk.SpinButton, Gtk.DropDown, Gtk.FontDialogButton, Gtk.ColorDialogButton)) else "", suffix) if p]
         self.set_subtitle("\n".join(parts))
         self.control.set_sensitive(writable)
-        self.reset_button.set_sensitive(writable and self.expected["user"] is not None)
+        modified = writable and self.expected["user"] is not None
+        self.reset_button.set_sensitive(modified)
+        self.reset_button.set_opacity(1 if modified else 0)
+        self.reset_button.set_can_target(modified)
+        self.reset_button.set_can_focus(modified)
+        if modified:
+            self.add_css_class("modified")
+        else:
+            self.remove_css_class("modified")
         if not self.advanced:
             if isinstance(self.control, Gtk.Switch):
                 self.control.set_active(val)

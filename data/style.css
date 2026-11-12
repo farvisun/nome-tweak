@@ -1,16 +1,60 @@
+/* Desktop Studio — layered on libadwaita named colors so light, dark,
+   high-contrast, and accent preferences are inherited automatically. */
+
+/* Sidebar */
 .studio-sidebar { background-color: var(--sidebar-bg-color); color: var(--sidebar-fg-color); }
-.navigation-sidebar row { border-radius: 10px; margin-bottom: 3px; }
-.navigation-sidebar row:selected { background: color-mix(in srgb, var(--accent-bg-color) 16%, transparent); color: var(--accent-color); }
-.info-box { padding: 16px; border-radius: 12px; background-color: color-mix(in srgb, var(--accent-bg-color) 8%, var(--card-bg-color)); }
-.badge { padding: 3px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background-color: color-mix(in srgb, var(--accent-bg-color) 12%, transparent); color: var(--accent-color); }
-.hero { padding: 28px; border-radius: 20px; background: linear-gradient(120deg, color-mix(in srgb, var(--accent-bg-color) 14%, var(--card-bg-color)), var(--card-bg-color)); }
-.metric { padding: 18px; border-radius: 14px; background-color: var(--card-bg-color); box-shadow: 0 1px 3px alpha(black, 0.05); }
-.preview { border-radius: 16px; background: linear-gradient(135deg, #193c46, #376b69 55%, #9aae8d); }
-.preview-bar { background: alpha(black, 0.58); color: white; padding: 7px 14px; }
-.preview-dock { background: alpha(black, 0.38); border: 1px solid alpha(white, 0.2); padding: 9px 13px; border-radius: 17px; margin: 16px; }
-.preview-window { padding: 22px; border-radius: 12px; background: alpha(white, 0.94); color: #223335; box-shadow: 0 6px 28px alpha(black, 0.22); }
-.shortcut-key { padding: 6px 10px; border-radius: 7px; background: var(--card-bg-color); border: 1px solid var(--border-color); font-family: monospace; }
+.navigation-sidebar row { border-radius: 8px; margin-bottom: 1px; min-height: 34px; }
+.navigation-sidebar row:selected { background-color: color-mix(in srgb, var(--accent-bg-color) 14%, transparent); color: var(--accent-color); font-weight: 600; }
+.navigation-sidebar row:selected image { color: var(--accent-color); }
+.nav-section { margin: 16px 16px 4px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.55; }
+.sidebar-footer { border-top: 1px solid var(--border-color); padding-top: 10px; }
+.status-dot { min-width: 8px; min-height: 8px; border-radius: 99px; background-color: var(--success-color); }
+.update-badge { padding: 4px 10px; min-height: 0; border-radius: 99px; font-size: 0.8rem; font-weight: 600; background-color: color-mix(in srgb, var(--accent-bg-color) 16%, transparent); color: var(--accent-color); }
+
+/* Page header */
+.page-header { margin-bottom: 4px; }
+.page-icon { min-width: 44px; min-height: 44px; border-radius: 12px; color: var(--accent-color); background-color: color-mix(in srgb, var(--accent-bg-color) 13%, transparent); }
+
+/* Rows */
+row .row-icon { opacity: 0.8; }
+.row-action { min-width: 32px; min-height: 32px; padding: 0; }
+row.modified > box > box.title > .title { font-weight: 600; }
+
+/* Pills & badges */
+.pill, .badge { padding: 2px 9px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+.badge, .pill-accent { background-color: color-mix(in srgb, var(--accent-bg-color) 13%, transparent); color: var(--accent-color); }
+.pill-neutral { background-color: color-mix(in srgb, currentColor 9%, transparent); }
+.pill-success { background-color: color-mix(in srgb, var(--success-bg-color) 16%, transparent); color: var(--success-color); }
+.pill-warning { background-color: color-mix(in srgb, var(--warning-bg-color) 20%, transparent); color: var(--warning-color); }
+.pill-error { background-color: color-mix(in srgb, var(--error-bg-color) 16%, transparent); color: var(--error-color); }
+
+/* Notices */
+.info-box { padding: 12px 16px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--accent-bg-color) 22%, transparent); background-color: color-mix(in srgb, var(--accent-bg-color) 6%, var(--card-bg-color)); }
+.info-box .info-icon { color: var(--accent-color); }
+.info-box .info-text { font-size: 0.9rem; line-height: 1.4; }
+.info-warning { border-color: color-mix(in srgb, var(--warning-bg-color) 40%, transparent); background-color: color-mix(in srgb, var(--warning-bg-color) 9%, var(--card-bg-color)); }
+.info-warning .info-icon { color: var(--warning-color); }
+
+/* Overview */
+.metric { padding: 16px 18px; border-radius: 12px; background-color: var(--card-bg-color); border: 1px solid var(--border-color); }
+.metric .metric-value { font-size: 1.15rem; font-weight: 700; }
+.metric .metric-label { font-size: 0.8rem; opacity: 0.65; }
+.metric image { color: var(--accent-color); }
+.tile { padding: 14px 16px; border-radius: 12px; background-color: var(--card-bg-color); border: 1px solid var(--border-color); }
+.tile:hover { background-color: color-mix(in srgb, var(--accent-bg-color) 5%, var(--card-bg-color)); border-color: color-mix(in srgb, var(--accent-bg-color) 35%, var(--border-color)); }
+.tile .tile-icon { min-width: 36px; min-height: 36px; border-radius: 10px; color: var(--accent-color); background-color: color-mix(in srgb, var(--accent-bg-color) 12%, transparent); }
+.section-title { font-weight: 700; }
+
+/* Desktop preview */
+.preview { border-radius: 14px; border: 1px solid var(--border-color); background: linear-gradient(135deg, #193c46, #376b69 55%, #9aae8d); }
+.preview-bar { background: alpha(black, 0.58); color: white; padding: 6px 14px; }
+.preview-dock { background: alpha(black, 0.38); border: 1px solid alpha(white, 0.2); padding: 8px 12px; border-radius: 16px; margin: 14px; }
+.preview-window { padding: 20px 22px; border-radius: 12px; background: alpha(white, 0.94); color: #223335; box-shadow: 0 6px 28px alpha(black, 0.22); }
+
+/* Misc */
+.hero { padding: 24px; border-radius: 14px; border: 1px solid var(--border-color); background-color: var(--card-bg-color); }
+.shortcut-key { padding: 4px 9px; border-radius: 6px; background: var(--card-bg-color); border: 1px solid var(--border-color); font-family: monospace; }
 .section-link { padding: 16px; border-radius: 12px; }
 .caption { line-height: 1.35; }
 textview { background-color: var(--view-bg-color); color: var(--view-fg-color); }
-.cursor-card { padding: 18px; border-radius: 14px; background: var(--card-bg-color); border: 1px solid var(--border-color); }
+.cursor-card { padding: 18px; border-radius: 12px; background: var(--card-bg-color); border: 1px solid var(--border-color); }

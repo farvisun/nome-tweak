@@ -11,24 +11,32 @@ class Category:
     title: str
     icon: str
     description: str
+    section: str = ""
 
+
+SECTIONS = {
+    "personalize": _("Personalization"),
+    "devices": _("Input & Devices"),
+    "system": _("System"),
+    "manage": _("Management"),
+}
 
 CATEGORIES = [
-    Category("overview", _("Overview"), "view-grid-symbolic", _("A desktop that feels like yours.")),
-    Category("appearance", _("Appearance"), "applications-graphics-symbolic", _("Color, character, and the finer details.")),
-    Category("dock", _("Dock"), "view-app-grid-symbolic", _("Your applications, exactly where you want them.")),
-    Category("extensions", _("Top Bar & Extensions"), "application-x-addon-symbolic", _("The small details at the top of your desktop.")),
-    Category("keyboard", _("Keyboard"), "input-keyboard-symbolic", _("Layouts, shortcuts, and familiar muscle memory.")),
-    Category("windows", _("Windows & Workspaces"), "focus-windows-symbolic", _("Make room for the way you work.")),
-    Category("input", _("Mouse & Touchpad"), "input-mouse-symbolic", _("Fine-tune every movement.")),
-    Category("displays", _("Displays"), "video-display-symbolic", _("A comfortable view, on every screen.")),
-    Category("sound", _("Sound & Notifications"), "audio-volume-high-symbolic", _("Choose what deserves your attention.")),
-    Category("power", _("Power & Privacy"), "battery-symbolic", _("Balance comfort, energy, and privacy.")),
-    Category("accessibility", _("Accessibility"), "preferences-desktop-accessibility-symbolic", _("A desktop that works for everyone.")),
-    Category("system", _("System & Apps"), "preferences-system-symbolic", _("Connections, language, and everyday essentials.")),
-    Category("advanced", _("Advanced Settings"), "preferences-other-symbolic", _("Explore the settings your system exposes.")),
-    Category("profiles", _("Profiles & Backups"), "document-save-symbolic", _("Save a setup. Review every change. Return anytime.")),
-    Category("history", _("Recent Changes"), "document-open-recent-symbolic", _("A clear record, with a way back.")),
+    Category("overview", _("Overview"), "user-home-symbolic", _("A desktop that feels like yours.")),
+    Category("appearance", _("Appearance"), "applications-graphics-symbolic", _("Color, character, and the finer details."), "personalize"),
+    Category("dock", _("Dock"), "view-app-grid-symbolic", _("Your applications, exactly where you want them."), "personalize"),
+    Category("extensions", _("Top Bar & Extensions"), "application-x-addon-symbolic", _("The small details at the top of your desktop."), "personalize"),
+    Category("windows", _("Windows & Workspaces"), "focus-windows-symbolic", _("Make room for the way you work."), "personalize"),
+    Category("keyboard", _("Keyboard"), "input-keyboard-symbolic", _("Layouts, shortcuts, and familiar muscle memory."), "devices"),
+    Category("input", _("Mouse & Touchpad"), "input-mouse-symbolic", _("Fine-tune every movement."), "devices"),
+    Category("displays", _("Displays"), "video-display-symbolic", _("A comfortable view, on every screen."), "devices"),
+    Category("sound", _("Sound & Notifications"), "audio-volume-high-symbolic", _("Choose what deserves your attention."), "devices"),
+    Category("power", _("Power & Privacy"), "battery-symbolic", _("Balance comfort, energy, and privacy."), "system"),
+    Category("accessibility", _("Accessibility"), "preferences-desktop-accessibility-symbolic", _("A desktop that works for everyone."), "system"),
+    Category("system", _("System & Apps"), "preferences-system-symbolic", _("Connections, language, and everyday essentials."), "system"),
+    Category("advanced", _("Advanced Settings"), "preferences-other-symbolic", _("Explore the settings your system exposes."), "system"),
+    Category("profiles", _("Profiles & Backups"), "document-save-symbolic", _("Save a setup. Review every change. Return anytime."), "manage"),
+    Category("history", _("Recent Changes"), "document-open-recent-symbolic", _("A clear record, with a way back."), "manage"),
 ]
 CATEGORY_MAP = {c.id: c for c in CATEGORIES}
 
