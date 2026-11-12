@@ -469,3 +469,18 @@ def show_setting_dialog(window, spec):
     content.append(actions)
     d.present(window)
     return d
+
+
+def on_screen(widget):
+    """True while the widget is shown in a window that is not minimized.
+
+    Periodic status polls spawn a process each time; skip them when nobody can
+    see the result.
+    """
+    root = widget.get_root()
+    if root is None or not widget.get_mapped():
+        return False
+    surface = root.get_surface() if hasattr(root, "get_surface") else None
+    if surface is not None and hasattr(surface, "get_state"):
+        return not surface.get_state() & Gdk.ToplevelState.MINIMIZED
+    return True

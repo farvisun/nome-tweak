@@ -8,7 +8,7 @@ from ..core.settings import Ref, SettingsError
 from ..i18n import _
 from ..platform.keyboard import INPUT, CUSTOM, MEDIA, canonical_shortcut, conflicts, create_custom_shortcut, layouts, shortcut_refs, toshy_to_gnome, xkb_options, validate_xkb_options
 from ..platform.services import background, launch, open_settings, open_uri
-from .widgets import action_row, buffer_text, button, dialog, group, info_box, label, text_editor
+from .widgets import on_screen, action_row, buffer_text, button, dialog, group, info_box, label, text_editor
 
 
 def build(w, content):
@@ -313,6 +313,8 @@ def build_toshy(w, content):
     def refresh_status():
         if not status_row.get_root():
             return False
+        if not on_screen(status_row):
+            return True
         background(w.toshy.status, lambda text: status_row.set_subtitle(text), lambda msg: status_row.set_subtitle(msg))
         return True
     GLib.timeout_add_seconds(4, refresh_status)

@@ -11,7 +11,7 @@ from ..catalog import CATEGORIES, CATEGORY_MAP, SECTIONS, SPECS, Spec
 from ..core.settings import Ref, SettingsError
 from ..i18n import _
 from ..platform.services import Audio, Connections, DesktopAppInfo, StartupApps, background, launch, open_settings, open_uri, theme_names
-from .widgets import SettingRow, action_row, button, dialog, friendly_time, group, info_box, label, pill
+from .widgets import SettingRow, on_screen, action_row, button, dialog, friendly_time, group, info_box, label, pill
 
 
 def value(w, schema, key, default=""):
@@ -378,6 +378,8 @@ def build_sound(w, content):
         def refresh():
             if not slider.get_root():
                 return False
+            if not on_screen(slider):
+                return True
             def update(text):
                 if state["drag"]:
                     return
@@ -405,7 +407,11 @@ def build_sound(w, content):
                 muted, expected = s.get_active(), state["value"]
                 background(lambda: audio.mute(muted, expected), lambda _r: refresh(), lambda msg: (w.error(msg), refresh()))
         mute.connect("notify::active", set_mute)
-        GLib.idle_add(refresh); GLib.timeout_add_seconds(3, refresh)
+        # refresh() returns True to keep the 3 s timer alive; as an idle callback that
+        # re-ran on every main-loop iteration, spawning wpctl continuously. Load
+        # whenever the page becomes visible instead.
+        slider.connect("map", lambda *_a: refresh())
+        GLib.timeout_add_seconds(3, refresh)
     w.add_specs(content, "sound")
     w.system_link(content, _("Sound"), _("Choose input/output devices, balance, audio profiles, and per-application levels in the supported GNOME sound mixer."), "sound")
     w.system_link(content, _("Notifications"), _("Per-application notification permissions and lock-screen behavior."), "notifications")
