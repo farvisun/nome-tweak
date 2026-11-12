@@ -339,16 +339,20 @@ footer.site a { color: var(--muted); }
       <div class="section-head">
         <div class="kicker">Install</div>
         <h2>Up and running in a minute.</h2>
-        <p>Uses the system Python and GTK, with no virtual environment, pip packages, or administrator access for a per-user install.</p>
+        <p>One command adds the signed farvisun APT repository and installs Desktop Studio. Updates then arrive with your normal system updates.</p>
       </div>
       <div class="install">
         <div>
           <div class="tabs" role="tablist" aria-label="Installation method">
-            <button role="tab" id="t-user" aria-controls="p-user" aria-selected="true">Per-user</button>
+            <button role="tab" id="t-one" aria-controls="p-one" aria-selected="true">One command</button>
+            <button role="tab" id="t-user" aria-controls="p-user" aria-selected="false" tabindex="-1">Per-user</button>
             <button role="tab" id="t-deb" aria-controls="p-deb" aria-selected="false" tabindex="-1">Debian package</button>
             <button role="tab" id="t-run" aria-controls="p-run" aria-selected="false" tabindex="-1">Run from source</button>
           </div>
-          <div role="tabpanel" id="p-user" aria-labelledby="t-user">
+          <div role="tabpanel" id="p-one" aria-labelledby="t-one">
+            <div class="code"><button class="copy" type="button">Copy</button><pre><code>curl -fsSL https://farvisun.github.io/nome-tweak/install.sh | bash</code></pre></div>
+          </div>
+          <div role="tabpanel" id="p-user" aria-labelledby="t-user" hidden>
             <div class="code"><button class="copy" type="button">Copy</button><pre><code><span class="c"># Dependencies (Ubuntu)</span>
 sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
   gir1.2-gdkpixbuf-2.0 librsvg2-common

@@ -35,16 +35,25 @@ Desktop Studio is a native app for Ubuntu and GNOME that brings appearance, dock
 
 ## Install
 
-Desktop Studio runs on GNOME with GTK 4.12+ and libadwaita 1.5+. It is tested on **Ubuntu 26.04 with GNOME 50**.
+Desktop Studio runs on GNOME with GTK 4.12+ and libadwaita 1.5+. It is tested on **Ubuntu 26.04 with GNOME 50**. Open a terminal and run:
 
-**Package (recommended)**
+```sh
+curl -fsSL https://farvisun.github.io/nome-tweak/install.sh | bash
+```
 
-1. Download `desktop-studio_1.0.0_all.deb` from the [latest release](https://github.com/farvisun/nome-tweak/releases/latest).
-2. Install it:
-   ```sh
-   sudo apt install ./desktop-studio_1.0.0_all.deb
-   ```
-3. Open **Desktop Studio** from the Applications menu.
+Then open **Desktop Studio** from the Applications menu.
+
+The script adds the signed [farvisun APT repository](https://farvisun.github.io/apt/) and installs the `desktop-studio` package. It asks for your password. From then on, Desktop Studio updates with your normal system updates.
+
+<details>
+<summary><b>Install the package manually</b></summary>
+
+Download `desktop-studio_<version>_all.deb` from the [latest release](https://github.com/farvisun/nome-tweak/releases/latest), then:
+
+```sh
+sudo apt install ./desktop-studio_*_all.deb
+```
+</details>
 
 <details>
 <summary><b>Install for your user only, without sudo</b></summary>
@@ -92,7 +101,7 @@ Yes. Start it with `LANGUAGE=fa desktop-studio`. The layout switches to right-to
 In `~/.local/share/desktop-studio/`. Uninstalling the app keeps them.
 
 **How do I uninstall it?**
-Run `sudo apt remove desktop-studio`. Your desktop settings stay as they are, and your profiles and backups are kept.
+Run `curl -fsSL https://farvisun.github.io/nome-tweak/install.sh | bash -s -- --uninstall`, or `sudo apt remove desktop-studio`. Your desktop settings stay as they are, and your profiles and backups are kept.
 
 ## Development
 
