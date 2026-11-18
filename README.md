@@ -15,7 +15,7 @@
   <a href="https://github.com/farvisun/nome-tweak/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/farvisun/nome-tweak"></a>
   <a href="https://github.com/farvisun/nome-tweak/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/farvisun/nome-tweak/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="GTK4 + libadwaita" src="https://img.shields.io/badge/GTK4-libadwaita-4a86cf?logo=gnome&logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
+  <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-green">
 </p>
 
 <p align="center">
@@ -116,4 +116,4 @@ The core logic lives in `desktop_studio/core/`, system integration in `platform/
 
 ## License
 
-[MIT](LICENSE)
+[Apache-2.0](LICENSE). Keep the [NOTICE](NOTICE) in any copy or derivative work
